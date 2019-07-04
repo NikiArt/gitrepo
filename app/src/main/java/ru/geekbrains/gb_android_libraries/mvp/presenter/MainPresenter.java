@@ -1,8 +1,13 @@
 package ru.geekbrains.gb_android_libraries.mvp.presenter;
 
 import android.annotation.SuppressLint;
+
 import com.arellomobile.mvp.InjectViewState;
 import com.arellomobile.mvp.MvpPresenter;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import io.reactivex.Scheduler;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
@@ -11,38 +16,25 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import ru.geekbrains.gb_android_libraries.mvp.model.entity.Repository;
 import ru.geekbrains.gb_android_libraries.mvp.model.repo.CountriesRepo;
-import ru.geekbrains.gb_android_libraries.mvp.model.entity.Country;
 import ru.geekbrains.gb_android_libraries.mvp.model.repo.RepositoryRepo;
 import ru.geekbrains.gb_android_libraries.mvp.model.repo.UsersRepo;
 import ru.geekbrains.gb_android_libraries.mvp.view.CountryRowView;
 import ru.geekbrains.gb_android_libraries.mvp.view.MainView;
 import timber.log.Timber;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @InjectViewState
 public class MainPresenter extends MvpPresenter<MainView> {
-    class CountriesListPresenter implements ICountryListPresenter {
+    @SuppressLint("CheckResult")
+    @Override
+    protected void onFirstViewAttach() {
+        super.onFirstViewAttach();
+        getViewState().init();
+        loadCountries();
+        loadUser();
 
-        PublishSubject<CountryRowView> clickSubject = PublishSubject.create();
-        List<Repository> repositories = new ArrayList<>();
-
-        @Override
-        public void bind(CountryRowView view) {
-            view.setTitle(repositories.get(view.getPos()).getUrl());
-            view.setCode("(" + repositories.get(view.getPos()).getId() + ")");
-        }
-
-        @Override
-        public int getCount() {
-            return repositories.size();
-        }
-
-        @Override
-        public PublishSubject<CountryRowView> getClickSubject() {
-            return clickSubject;
-        }
+        countriesListPresenter.getClickSubject().subscribe(countryRowView -> {
+            getViewState().showMessage(countriesListPresenter.repositories.get(countryRowView.getPos()).getName());
+        });
     }
 
     private CountriesRepo coutriesRepo;
@@ -62,30 +54,30 @@ public class MainPresenter extends MvpPresenter<MainView> {
         return countriesListPresenter;
     }
 
-    @SuppressLint("CheckResult")
-    @Override
-    protected void onFirstViewAttach() {
-        super.onFirstViewAttach();
-        getViewState().init();
-        loadCountries();
-        loadUser();
+    class CountriesListPresenter implements ICountryListPresenter {
 
-        countriesListPresenter.getClickSubject().subscribe(countryRowView -> {
-            getViewState().showMessage(countriesListPresenter.repositories.get(countryRowView.getPos()).getUrl());
-        });
+        PublishSubject<CountryRowView> clickSubject = PublishSubject.create();
+        List<Repository> repositories = new ArrayList<>();
+
+        @Override
+        public void bind(CountryRowView view) {
+            view.setTitle(repositories.get(view.getPos()).getName());
+            view.setCode("(" + repositories.get(view.getPos()).getId() + ")");
+        }
+
+        @Override
+        public int getCount() {
+            return repositories.size();
+        }
+
+        @Override
+        public PublishSubject<CountryRowView> getClickSubject() {
+            return clickSubject;
+        }
     }
 
 
     private void loadCountries() {
-        /*getViewState().showLoading();
-        coutriesRepo.getCountries()
-                .observeOn(mainThreadScheduler)
-                .subscribe(countries -> {
-                    countriesListPresenter.countries.clear();
-                    countriesListPresenter.countries.addAll(countries);
-                    getViewState().updateList();
-                    getViewState().hideLoading();
-                }, t -> Timber.e(t));*/
 
         getViewState().showLoading();
         repositoryRepo.getRepo("googlesamples")
