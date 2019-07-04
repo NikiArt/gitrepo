@@ -16,7 +16,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import ru.geekbrains.gb_android_libraries.mvp.model.entity.Repository;
 import ru.geekbrains.gb_android_libraries.mvp.model.repo.CountriesRepo;
-import ru.geekbrains.gb_android_libraries.mvp.model.repo.RepositoryRepo;
 import ru.geekbrains.gb_android_libraries.mvp.model.repo.UsersRepo;
 import ru.geekbrains.gb_android_libraries.mvp.view.CountryRowView;
 import ru.geekbrains.gb_android_libraries.mvp.view.MainView;
@@ -39,7 +38,6 @@ public class MainPresenter extends MvpPresenter<MainView> {
 
     private CountriesRepo coutriesRepo;
     private UsersRepo usersRepo;
-    private RepositoryRepo repositoryRepo;
     private Scheduler mainThreadScheduler;
     private CountriesListPresenter countriesListPresenter;
 
@@ -80,7 +78,7 @@ public class MainPresenter extends MvpPresenter<MainView> {
     private void loadCountries() {
 
         getViewState().showLoading();
-        repositoryRepo.getRepo("googlesamples")
+        usersRepo.getRepo("googlesamples")
                 .observeOn(mainThreadScheduler)
                 .subscribe(repositories -> {
 
